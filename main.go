@@ -26,9 +26,7 @@ func main() {
 			fmt.Printf("os.ReadDir: %s\n", err)
 			os.Exit(0)
 		}
-		cws := &codeWorkSpace{
-			Folders: make([]folder, 0),
-		}
+		cws := &codeWorkSpace{}
 		cwsName := v + ".code-workspace"
 		m := map[string]struct{}{}
 		if FileExists(cwsName) {
@@ -45,14 +43,15 @@ func main() {
 				m[v.Path] = struct{}{}
 			}
 		}
+		cws.Folders = []folder{}
 		for i := range items {
 			if !items[i].IsDir() {
 				continue
 			}
 			path := filepath.Join(v, items[i].Name())
-			if _, ok := m[path]; ok {
-				continue
-			}
+			m[path] = struct{}{}
+		}
+		for path := range m {
 			cws.Folders = append(cws.Folders, folder{Path: path})
 		}
 		data, err := json.MarshalIndent(cws, "", "    ")
@@ -69,10 +68,8 @@ func main() {
 }
 
 func FileExists(path string) bool {
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
 	}
 	return true
 }
