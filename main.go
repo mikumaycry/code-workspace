@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 )
 
 type codeWorkSpace struct {
@@ -51,7 +52,12 @@ func main() {
 			path := filepath.Join(v, items[i].Name())
 			m[path] = struct{}{}
 		}
+		paths := []string{}
 		for path := range m {
+			paths = append(paths, path)
+		}
+		sort.Strings(paths)
+		for _, path := range paths {
 			cws.Folders = append(cws.Folders, folder{Path: path})
 		}
 		data, err := json.MarshalIndent(cws, "", "    ")
